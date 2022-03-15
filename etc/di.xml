@@ -1,0 +1,138 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Copyright © 2016 Magento. All rights reserved.
+ * See COPYING.txt for license details.
+ */
+-->
+
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <!-- Payment Method Facade configuration -->
+    <virtualType name="MultibancoFacade" type="Magento\Payment\Model\Method\Adapter">
+        <arguments>
+            <argument name="code" xsi:type="const">\Eupago\Multibanco\Model\Ui\ConfigProvider::CODE</argument>
+            <argument name="formBlockType" xsi:type="string">Magento\Payment\Block\Form</argument>
+            <argument name="infoBlockType" xsi:type="string">Eupago\Multibanco\Block\Info</argument>
+            <argument name="valueHandlerPool" xsi:type="object">MultibancoValueHandlerPool</argument>
+            <argument name="commandPool" xsi:type="object">MultibancoCommandPool</argument>
+        </arguments>
+    </virtualType>
+
+    <!-- Configuration reader -->
+    <virtualType name="MultibancoConfig" type="Magento\Payment\Gateway\Config\Config">
+        <arguments>
+            <argument name="methodCode" xsi:type="const">\Eupago\Multibanco\Model\Ui\ConfigProvider::CODE</argument>
+        </arguments>
+    </virtualType>
+
+    <!-- Logger, initialized with MbWayConfig -->
+    <virtualType name="MultibancoLogger" type="Magento\Payment\Model\Method\Logger">
+        <arguments>
+            <argument name="config" xsi:type="object">MultibancoConfig</argument>
+        </arguments>
+    </virtualType>
+
+    <type name="Eupago\Multibanco\Gateway\Http\Client\Client">
+        <arguments>
+            <argument name="logger" xsi:type="object">MultibancoLogger</argument>
+        </arguments>
+    </type>
+
+    <!-- Commands infrastructure -->
+    <virtualType name="MultibancoCommandPool" type="Magento\Payment\Gateway\Command\CommandPool">
+        <arguments>
+            <argument name="commands" xsi:type="array">
+                <item name="authorize" xsi:type="string">MultibancoAuthorizeCommand</item>
+                <item name="capture" xsi:type="string">MultibancoCaptureCommand</item>
+                <item name="void" xsi:type="string">MultibancoVoidCommand</item>
+            </argument>
+        </arguments>
+    </virtualType>
+
+    <!-- Authorize command -->
+    <virtualType name="MultibancoAuthorizeCommand" type="Magento\Payment\Gateway\Command\GatewayCommand">
+        <arguments>
+            <argument name="requestBuilder" xsi:type="object">MultibancoAuthorizationRequest</argument>
+            <argument name="handler" xsi:type="object">MultibancoResponseHandlerComposite</argument>
+            <argument name="transferFactory" xsi:type="object">Eupago\Multibanco\Gateway\Http\TransferFactory</argument>
+            <argument name="client" xsi:type="object">Eupago\Multibanco\Gateway\Http\Client\Client</argument>
+        </arguments>
+    </virtualType>
+
+    <!-- Authorization Request -->
+    <virtualType name="MultibancoAuthorizationRequest" type="Magento\Payment\Gateway\Request\BuilderComposite">
+        <arguments>
+            <argument name="builders" xsi:type="array">
+                <item name="transaction" xsi:type="string">Eupago\Multibanco\Gateway\Request\AuthorizationRequest</item>
+                <item name="data" xsi:type="string">Eupago\Multibanco\Gateway\Request\DataRequest</item>
+            </argument>
+        </arguments>
+    </virtualType>
+    <type name="Eupago\Multibanco\Gateway\Request\AuthorizationRequest">
+        <arguments>
+            <argument name="config" xsi:type="object">MultibancoConfig</argument>
+        </arguments>
+    </type>
+
+    <!-- Capture command -->
+    <virtualType name="MultibancoCaptureCommand" type="Magento\Payment\Gateway\Command\GatewayCommand">
+        <arguments>
+            <argument name="requestBuilder" xsi:type="object">Eupago\Multibanco\Gateway\Request\CaptureRequest</argument>
+            <argument name="handler" xsi:type="object">Eupago\Multibanco\Gateway\Response\TxnIdHandler</argument>
+            <argument name="transferFactory" xsi:type="object">Eupago\Multibanco\Gateway\Http\TransferFactory</argument>
+            <argument name="validator" xsi:type="object">Eupago\Multibanco\Gateway\Validator\ResponseCodeValidator</argument>
+            <argument name="client" xsi:type="object">Eupago\Multibanco\Gateway\Http\Client\Client</argument>
+        </arguments>
+    </virtualType>
+
+    <!-- Capture Request -->
+    <type name="Eupago\Multibanco\Gateway\Request\CaptureRequest">
+        <arguments>
+            <argument name="config" xsi:type="object">MultibancoConfig</argument>
+        </arguments>
+    </type>
+
+    <!-- Void command -->
+    <virtualType name="MultibancoVoidCommand" type="Magento\Payment\Gateway\Command\GatewayCommand">
+        <arguments>
+            <!--<argument name="requestBuilder" xsi:type="object">Eupago\Multibanco\Gateway\Request\VoidRequest</argument>-->
+            <argument name="handler" xsi:type="object">Eupago\Multibanco\Gateway\Response\TxnIdHandler</argument>
+            <argument name="transferFactory" xsi:type="object">Eupago\Multibanco\Gateway\Http\TransferFactory</argument>
+            <argument name="validator" xsi:type="object">Eupago\Multibanco\Gateway\Validator\ResponseCodeValidator</argument>
+            <argument name="client" xsi:type="object">Eupago\Multibanco\Gateway\Http\Client\Client</argument>
+        </arguments>
+    </virtualType>
+
+
+    <!-- Response handlers -->
+    <virtualType name="MultibancoResponseHandlerComposite" type="Magento\Payment\Gateway\Response\HandlerChain">
+        <arguments>
+            <argument name="handlers" xsi:type="array">
+                <item name="txnid" xsi:type="string">Eupago\Multibanco\Gateway\Response\TxnIdHandler</item>
+                <!--<item name="fraud" xsi:type="string">Eupago\Multibanco\Gateway\Response\FraudHandler</item>-->
+            </argument>
+        </arguments>
+    </virtualType>
+
+    <!-- Value handlers infrastructure -->
+    <virtualType name="MultibancoValueHandlerPool" type="Magento\Payment\Gateway\Config\ValueHandlerPool">
+        <arguments>
+            <argument name="handlers" xsi:type="array">
+                <item name="default" xsi:type="string">MultibancoConfigValueHandler</item>
+            </argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="MultibancoConfigValueHandler" type="Magento\Payment\Gateway\Config\ConfigValueHandler">
+        <arguments>
+            <argument name="configInterface" xsi:type="object">MultibancoConfig</argument>
+        </arguments>
+    </virtualType>
+    <type name="Eupago\Multibanco\Block\Info">
+        <arguments>
+            <argument name="config" xsi:type="object">MultibancoConfig</argument>
+        </arguments>
+    </type>
+    <preference for="Magento\Checkout\Block\Onepage\Success" type="Eupago\Multibanco\Block\Checkout\Onepage\Success\Response"/>
+
+</config>

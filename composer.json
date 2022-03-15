@@ -1,0 +1,25 @@
+{
+  "name": "eupago/multibanco",
+  "description": "Module of Integration euPago",
+  "homepage": "https://www.eupago.pt",
+  "type": "magento2-module",
+  "require": {
+    "php": "~7.4"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "4.1.0"
+  },
+  "version": "100.0.9",
+  "license": [
+    "proprietary"
+  ],
+  "autoload": {
+    "files": [
+      "registration.php"
+    ],
+    "psr-4": {
+     "Eupago\\Multibanco\\": ""
+    }
+  },
+  "minimum-stability": "dev"
+}

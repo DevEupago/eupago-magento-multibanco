@@ -1,0 +1,39 @@
+<?php
+if ($block->isMethodEupago()) { ?>
+
+    <div id="checkout.eupago_multibanco.success">
+        <div style="min-width: 300px;">
+            <div align='center'>
+
+                <table style="width:100%; max-width:400px; padding:5px; font-size: 11px; color: #374953; margin:0 auto;">
+                    <tbody>
+                    <tr>
+                        <td style="font-size: 15px; border-top: 0px; border-left: 0px; border-right: 0px; border-bottom: 1px solid #45829F; padding:3px; background-color: #45829F; color: White; height:25px; line-height:25px" colspan="3"><div align="center"><?php echo __('Pagamento por Multibanco ou Homebanking') ?></div></td>
+                    </tr>
+                    <tr style="background-color:#f1f1f1;">
+                        <td style="padding:8px 0;" rowspan="3"><div align="center"><img src="<?php echo $block->getViewFileUrl('Eupago_Multibanco::images/eupago/multibanco/eupago_mb_p.png')?>" alt="euPago" /></div></td>
+                        <td style="padding:10px 2px 2px 2px; font-weight:bold; text-align:left"><?php echo __('Entidade: ') ?></td>
+                        <td style="padding:10px 2px 2px 2px;  text-align:left"><?php echo $block->getData('entidade'); ?></td>
+                    </tr>
+                    <tr style="background-color:#f1f1f1;">
+                        <td style=" padding:2px; font-weight:bold; text-align:left"><?php echo __('Referência: ') ?></td>
+                        <td style=" padding:2px; text-align:left"><?php echo chunk_split($block->getData('referencia'),3,' '); ?></td>
+                    </tr>
+                    <tr style="background-color:#f1f1f1;">
+                        <td style="padding:2px; padding-bottom:10px; font-weight:bold; text-align:left"><?php echo __('Valor: ') ?></td>
+                        <td style="padding:2px; padding-bottom:10px; text-align:left"><?php echo $block->getData('grand_total'); ?>€</td>
+                    </tr>
+                    <tr>
+                        <td style="font-size: x-small; padding:0; border: 0px; text-align:center;" colspan="3"><?php echo __('O ticket obtido na maquina automática faz prova de pagamento') ?>.</td>
+                    </tr>
+                    <?php if($block->getData('data_limite') != ''){ ?>
+                        <tr>
+                            <td style="font-size: x-small; color:#dd0000; line-height: 10px; padding:0; border: 0px; text-align:center;" colspan="3"><?php echo __('Data limite de pagamento:') ?> </span><?php echo $block->getData('data_limite') ?></td>
+                        </tr>
+                    <?php } ?>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+<?php } ?>
